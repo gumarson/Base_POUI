@@ -37,6 +37,11 @@ Local oJsonResult 	:= JsonObject():New()
 Local lRet 			:= .T.
 Local cAliasOP 	:= GetNextAlias()
 
+Local  cVerde    := SuperGetMv("MV_POUIVER", .F., "100")
+Local cAmarelo   := SuperGetMv("MV_POUIAMA", .F., "75")
+Local cLaranja   := SuperGetMv("MV_POUILAR", .F., "50")
+Local cVermelho  := SuperGetMv("MV_POUIVEM", .F., "25")
+
 Local cCentro 		:= Self:_cCentro
 
 Local cDataIni 		:= Self:_dInicio
@@ -45,32 +50,27 @@ Local cDataFim 		:= Self:_dFim
 Local cDataIni2 		:= ''
 Local cDataFim2 		:= ''
 
+Local nTReal, nTEstim, dDataOp, cHrFim, nHr, nMin, cDtAtual, nDtHr, nDtMin, cAtraso, cCorStatus
 
-Local nTempoReal, nTempoEst, dDataOp, cHrFim, nHr, nMin, cDtAtual, nDtHr, nDtMin, cAtraso
+Local nPctTempo  := 0    
+Local nTRestante := 0
+Local cTRestante := ""
 
-Local cQueryDebug := ""
 
 cDataIni2 := StrTran(cDataIni, "-", "")  // "20250401"
 cDataFim2 := StrTran(cDataFim, "-", "")  // "20250415"
 
+FWLogMsg(cVerde, "verde")
+ConOut(  cVerde, "verde")
 
-cQueryDebug += "SELECT "
-cQueryDebug += "C2_NUM, C2_PRODUTO, B1_DESC, H6_QTDPROD, H8_QUANT, H8_RECURSO, H6_DATAINI, H8_TEMPEND, H6_TEMPO " + CRLF
-cQueryDebug += "FROM " + RetSqlName("SC2") + " SC2 " + CRLF
-cQueryDebug += "INNER JOIN " + RetSqlName("SB1") + " SB1 ON SB1.D_E_L_E_T_ = '' AND SB1.B1_COD = SC2.C2_PRODUTO " + CRLF
-cQueryDebug += "INNER JOIN " + RetSqlName("SH6") + " SH6 ON SH6.D_E_L_E_T_ = '' AND SH6.H6_OP = SC2.C2_NUM " + CRLF
-cQueryDebug += "INNER JOIN " + RetSqlName("SH8") + " SH8 ON SH8.D_E_L_E_T_ = '' AND SH8.H8_OP = SC2.C2_NUM " + CRLF
-cQueryDebug += "WHERE "
-cQueryDebug += "SC2.D_E_L_E_T_ = '' " + CRLF
-cQueryDebug += "AND H6_DATAINI <= '" + cDataFim2 + "' " + CRLF
-cQueryDebug += "AND H6_DATAINI >= '" + cDataIni2 + "' " + CRLF
-cQueryDebug += "AND H8_RECURSO = '" + cCentro + "'"
+FWLogMsg(cAmarelo, "amarelo")
+ConOut(  cAmarelo, "amarelo")
 
-FWLogMsg("?? QUERY DEBUG SQL (manual):")
-ConOut("?? QUERY DEBUG SQL (manual):")
-FWLogMsg(cQueryDebug)
-ConOut(cQueryDebug)
+FWLogMsg(cLaranja, "laranja")
+ConOut(  cLaranja, "laranja")
 
+FWLogMsg(cVermelho, "vermelho")
+ConOut(  cVermelho, "vermelho")
 
 // Adiciona headers de CORS
 Self:SetHeader("Access-Control-Allow-Origin", "http://localhost:4200")
@@ -125,14 +125,33 @@ ConOut("?? Registros encontrados: " + cValToChar((cAliasOP)->(RecCount())))
 
 While !(cAliasOP)->(Eof())
     //Variáveis para o cálculo de tempo
-    nTempoReal := Val((cAliasOP)->H6_TEMPO)
-    nTempoEst  := (cAliasOP)->H8_TEMPEND 
+    cHrReal      := (cAliasOP)->H6_TEMPO
+    
+    If Len(cHrReal) >= 5
+        nHrReal := Val(SubStr(cHrReal, 1, 2))
+        nMinReal := Val(SubStr(cHrReal, 4, 2))
+    Else
+        nHrReal := 0
+        nMinReal := 0
+    EndIf
+    
+    nTReal := (nHrReal * 60) + nMinReal
+    nTEstim  := (cAliasOP)->H8_TEMPEND 
+    
     dDataOp    := StoD((cAliasOP)->H6_DATAINI)
     cHrFim     := (cAliasOP)->H8_HRFIM 
+
+    If nTEstim > 0
+        nPctTempo := (nTReal / nTEstim) * 100
+    EndIf
+
+    nTRestante := nTEstim - nTReal
     
+    cTRestante := StrZero(Int(nTRestante / 60), 2) + ":" + StrZero(nTRestante % 60, 2)
+
     //Cálculo de atraso
-     nHr := Val(Left(cHrFim, 2))
-     nMin := Val(SubStr(cHrFim, 3, 2))
+    nHr := Val(Left(cHrFim, 2))
+    nMin := Val(SubStr(cHrFim, 3, 2))
 
     cDtAtual := Time() // "14:47:01"
     nDtHr := Val(Left(cDtAtual, 2))
@@ -150,6 +169,24 @@ While !(cAliasOP)->(Eof())
     
         cAtraso := StrZero(nAH, 2) + ":" + StrZero(nAM, 2)
     EndIf
+
+    //Cor do status -- Se no HTML aparecer como branco, está tendo erro de paramêtros
+    Do Case
+    Case nPctTempo >= Val(cVerde)
+        cCorStatus := "verde"
+    Case nPctTempo >= Val(cAmarelo) .And. nPctTempo < Val(cVerde)
+        cCorStatus := "amarelo"
+    Case nPctTempo >= Val(cLaranja) .And. nPctTempo < Val(cAmarelo)
+        cCorStatus := "laranja"
+    Case nPctTempo >= Val(cVermelho) .And. nPctTempo < Val(cLaranja)
+        cCorStatus := "vermelho"
+    Otherwise
+        cCorStatus := "Branco"
+End Case
+
+    
+    FWLogMsg("?? Cor do status: " + cCorStatus)
+    ConOut(  "?? Cor do status: " + cCorStatus)
     
     oItem := JsonObject():New()
     oItem['centroTrabalho']  := (cAliasOP)->H8_RECURSO
@@ -162,9 +199,10 @@ While !(cAliasOP)->(Eof())
     oItem['inicio']          := (cAliasOP)->(H6_DATAINI) //
     oItem['tempoEstimado']   := (cAliasOP)->(cValToChar(H8_TEMPEND))
     oItem['tempoReal']       := (cAliasOP)->(H6_TEMPO)
-    oItem['PConclusaoTempo'] := cValToChar((nTempoReal / nTempoEst) * 100)
-    oItem['tempoRestante']   := cValToChar(nTempoEst - nTempoReal)
+    oItem['PConclusaoTempo'] := cValToChar(nPctTempo) //(nTReal / nTEstim) * 100)
+    oItem['tempoRestante']   := cTRestante
     oItem['atraso']          :=  cAtraso    //(cAliasOP)->
+    oItem['statusCor']       := cCorStatus
 
     aAdd(aRegistros, oItem)
 

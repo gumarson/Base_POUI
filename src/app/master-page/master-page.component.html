@@ -31,10 +31,13 @@
   
   </po-page-default> -->
 
-  <po-page-default p-title="Painel de Produção">
+
+
+<!----------------------------------------------------
+-->
+  <!-- <po-page-default p-title="Painel de Produção">
 
     <div style="display: flex; flex-wrap: wrap; gap: 16px;">
-  
       <po-input
         name="centroTrabalho"
         p-label="Centro de Trabalho"
@@ -55,7 +58,6 @@
         [(ngModel)]="dataFim"
         style="flex: 1 1 30%;">
       </po-datepicker>
-  
     </div>
   
     <div style="margin-top: 24px;">
@@ -91,13 +93,94 @@
             <td>{{ item.inicio }}</td>
             <td>{{ item.tempoEstimado }}</td>
             <td>{{ item.tempoReal }}</td>
-            <td>{{ item.PConclusaoTempo }}%</td>
-            <td>{{ item.tempoRestante }}</td>
-            <td>{{ item.atraso }}</td>
+            <td [ngStyle]="{'background-color': getColor(item.PConclusaoTempo)}">
+              {{ item.PConclusaoTempo }}%
+            </td>
+            <td [ngStyle]="{'background-color': getColor(item.PConclusaoTempo)}">
+              {{ item.tempoRestante }}
+            </td>
+            <td [ngStyle]="{'background-color': getColor(item.PConclusaoTempo)}">
+              {{ item.atraso }}
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
   
   </po-page-default>
+   -->
+  
+
+   <po-page-default p-title="Painel de Produção">
+
+    <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+      <po-input
+        name="centroTrabalho"
+        p-label="Centro de Trabalho"
+        [(ngModel)]="centroTrabalho"
+        style="flex: 1 1 30%;">
+      </po-input>
+  
+      <po-datepicker
+        name="dataInicio"
+        p-label="Período De"
+        [(ngModel)]="dataInicio"
+        style="flex: 1 1 30%;">
+      </po-datepicker>
+  
+      <po-datepicker
+        name="dataFim"
+        p-label="Período Até"
+        [(ngModel)]="dataFim"
+        style="flex: 1 1 30%;">
+      </po-datepicker>
+    </div>
+  
+    <div style="margin-top: 24px;">
+      <po-button p-label="Buscar Dados" (p-click)="buscarDados()"></po-button>
+    </div>
+  
+    <div style="margin-top: 32px; overflow-x: auto;">
+      <table class="po-table" *ngIf="dados.length > 0">
+        <thead>
+          <tr>
+            <th>OP</th>
+            <th>Cod</th>
+            <th>Produto</th>
+            <th>Saldo</th>
+            <th>% Conclusão</th>
+            <th>Recurso</th>
+            <th>Início</th>
+            <th>Tempo Est</th>
+            <th>Tempo Real</th>
+            <th>% Conclusão</th>
+            <th>Tempo Rest</th>
+            <th>Atraso</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of dados">
+            <td>{{ item.ordemProducao }}</td>
+            <td>{{ item.codProd }}</td>
+            <td>{{ item.descProd }}</td>
+            <td>{{ item.saldo }}</td>
+            <td>{{ item.pConclusao }}%</td>
+            <td>{{ item.recurso }}</td>
+            <td>{{ formatarData(item.inicio) }}</td>
+            <td>{{ item.tempoEstimado }}</td>
+            <td>{{ item.tempoReal }}</td>
+            <td>{{ item.PConclusaoTempo }}%</td>
+            <td [ngStyle]="{'background-color': getColorByStatus(item.statusCor)}">
+              {{ item.tempoRestante }}
+            </td>
+            <td [ngStyle]="{'background-color': getColorByStatus(item.statusCor)}">
+              {{ item.atraso }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+  </po-page-default>
+  
   
