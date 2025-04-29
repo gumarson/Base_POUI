@@ -1,9 +1,10 @@
 const url_root = 'http://localhost:8080/rest'
 
+// const url_root = 'https://201.157.226.1:11225/rest'
+
 export const environment = {
-    ambiente: 'production',
+    // ambiente: 'production',
     
-    sh7: url_root + "/WSCOLET/sh7",
     sh8: url_root + "/WSCOLET/sh8",
 
     url: url_root,

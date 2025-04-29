@@ -10,13 +10,7 @@ import { MasterPageComponent } from './master-page/master-page.component';
 
 let rotas: Routes = [];
 
-if(environment.ambiente === 'protheus'){
-  rotas = 
-  [
-    { path: 'dash', component: DashProdComponent },
-  ]
-}else{
-  rotas = 
+rotas = 
   [
     {
       path: 'login',
@@ -32,7 +26,30 @@ if(environment.ambiente === 'protheus'){
   //     component: ErrorPageComponent,
   //  },
   ]
-}
+
+// if(environment.ambiente === 'protheus'){
+//   rotas = 
+//   [
+//     { path: 'dash', component: DashProdComponent },
+//   ]
+// }else{
+//   rotas = 
+//   [
+//     {
+//       path: 'login',
+//       component: LoginComponent,
+//    },
+//    {
+//    path: '', component: MasterPageComponent, canActivate: [authGuard], children: [
+//     { path: 'dash', component: DashProdComponent },
+//    ]
+//    },
+//   //  {
+//   //     path: '**',
+//   //     component: ErrorPageComponent,
+//   //  },
+//   ]
+// }
 
 @NgModule({
   imports: [RouterModule.forRoot(rotas)],

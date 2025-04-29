@@ -18,6 +18,7 @@ import { Observable } from 'rxjs';
 export class Sh8Service {
 
   private readonly baseUrl = 'http://localhost:8080/rest/wscolet/sh8';
+  // private readonly baseUrl = 'https://201.157.226.1:11225/rest/wscolet/sh8';
 
   constructor(private http: HttpClient) {}
 

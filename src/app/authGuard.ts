@@ -7,9 +7,9 @@ export const authGuard: CanActivateFn = (route, state) => {
   let username = localStorage.getItem('access_token')
   let url = state.url
   
-  if(environment.ambiente === 'protheus'){
-    return true
-  }
+  // if(environment.ambiente === 'protheus'){
+  //   return true
+  // }
 
   if(url !== '/login'){
     if(!username) {
